@@ -6,24 +6,52 @@
 #' way. In many models, degrees of freedom are saved by coding space and/or
 #' time parsimoniously using distance-based Moran Eigenvector Maps (dbMEM).
 #' 
-#' @details In \code{stimodels} tests for space-time interaction and space or time main
-#' effects are conducted using one of the different models. With Models 2, 6a
-#' and 6b the interaction test is not available.
+#' @details The 'stimodels' and 'quicksti' functions should only be used 
+#' (1) when each site has been sampled during each survey, with no missing data, 
+#' and (2) when there are no replicate observations of the space-time points. When 
+#' there is replication, use a regular permutational Manova function such as adonis2.
 #' 
-#' Model 2 - Space and Time are coded using Helmert contrasts for the main
-#' effects. No interaction is tested. Model 3a - Space is coded using dbMEM
-#' variables whereas Time is coded using Helmert contrasts. Model 3b - Space is
-#' coded using Helmert contrasts whereas Time is coded using dbMEM variables.
-#' Model 4 - Both Space and Time are coded using dbMEM variables for all tests.
-#' Model 5 - Space and Time are coded using Helmert contrasts for the main
-#' factor effects, but they are coded using dbMEM variables for the interaction
-#' term. Model 6a - Nested model. Testing for the existence of spatial
-#' structure (common or separate) using dbMEM variables to code for Space.
-#' Model 6b - Nested model. Testing for the existence of temporal structure
-#' (common or separate) using dbMEM variables to code for Time. Model 7 -
-#' Space and Time are coded using dbMEM variables for the main factor effects,
-#' but they are coded using Helmert contrasts for the interaction term (not
-#' recommended).
+#' When the sites form a one-dimensional spatial transect, or a meandering line 
+#' such as the course of a river, with regular sampling intervals, and the time series 
+#' has fairly equal time intervals, one can use the S and Ti arguments to indicate 
+#' the number of sites in space and the number of surveys along time. The order of 
+#' the sites in each temporal block of the input data file will be taken to correspond 
+#' to the spatial positions of the sites along the transect (from 1 to S), and the 
+#' order of the time blocks in the data file will be taken to indicate the temporal 
+#' order of the surveys (from 1 to Ti). The function will then compute dbMEM 
+#' eigenfunctions corresponding to the spatial and temporal positions of the data 
+#' rows in the input data file as if they were on straight lines.
+#' 
+#' When the sites do not form a regular, one-dimensional spatial transect, one must 
+#' provide a file of spatial coordinates of the sites to argument S. Similarly, when 
+#' the time series has unequal time intervals, one must provide a file of temporal 
+#' coordinates of the surveys to argument Ti.
+#' 
+#' Alternatively, one can use arguments COD.S or COD.T to provide a matrix of Helmert 
+#' contrasts to be used in the analysis in place of dbMEM eigenfunctions. One can do 
+#' that, for example, when there are only a few surveys along time and it would not 
+#' be useful to represent these few surveys by dbMEM eigenfunctions. That matrix can 
+#' have the class "matrix" or "numeric"; they both work in functions stimodels and 
+#' quicksti. Arguments COD.S and COD.T can also be used to provide matrices 
+#' containing other types of eigenfunctions, for example AEM eigenfunctions, to be 
+#' used instead of dbMEM matrices computed by stimodels or quicksti. However, do not 
+#' code both the space and time factors as Helmert contrasts; that would not leave 
+#' residual degrees of freedom for the test of the interaction.
+#' 
+#' In \code{stimodels} tests for space-time interaction and space or time main
+#' effects are conducted using one of the different models:
+#' \itemize{
+#'   \item{Model 2 - Space and Time are coded using Helmert contrasts for the main effects. No interaction is tested. }
+#'   \item{Model 3a - Space is coded using dbMEM variables whereas Time is coded using Helmert contrasts. }
+#'   \item{Model 3b - Space is coded using Helmert contrasts whereas Time is coded using dbMEM variables. }
+#'   \item{Model 4 - Both Space and Time are coded using dbMEM variables for all tests. }
+#'   \item{Model 5 - Space and Time are coded using Helmert contrasts for the main factor effects, but they are coded using dbMEM variables for the interaction term.}
+#'   \item{Model 6a - Nested model. Testing for the existence of spatial structure (common or separate) using dbMEM variables to code for Space. }
+#'   \item{Model 6b - Nested model. Testing for the existence of temporal structure (common or separate) using dbMEM variables to code for Time. }
+#'   \item{Model 7 - Space and Time are coded using dbMEM variables for the main factor effects, but they are coded using Helmert contrasts for the interaction term (not recommended).}
+#' }
+#' 
+#' With Models 2, 6a and 6b the interaction test is not available. 
 #' 
 #' When using \code{quicksti}, space-time interaction is first tested using
 #' Model 5. Depending on the outcome of this test, the main factors are tested
@@ -82,8 +110,10 @@
 #' the F denominator (\code{MS.den}), the proportion of explained variance
 #' (\code{R2}), the adjusted proportion of explained variance (\code{R2.adj}),
 #' the F statistics (\code{F}) and its p-value computed from a permutation test
-#' (\code{Prob}). } \item{testT}{ An object with the result of the time effect
-#' test, like \code{testS}.} \item{teststi}{ An object with the result of the
+#' (\code{Prob}). } 
+#' \item{testT}{ An object with the result of the time effect
+#' test, like \code{testS}.} 
+#' \item{teststi}{ An object with the result of the
 #' space-time interaction test, like \code{testS}.}
 #' @author Pierre Legendre \email{pierre.legendre@@umontreal.ca}, Miquel De Caceres and Daniel Borcard
 #' @seealso \code{\link{trichoptera}}
@@ -133,7 +163,7 @@
 	if(!is.logical(print.res)) {
 		stop("Wrong operator; 'print.res' should be either 'FALSE' or 'TRUE'", call.=FALSE)
 	}
-	if(model!="2" && model!="3a" && model!="3b" && model!="4" && model!="4" && model!="5" && model!="6a" && model!="6b" && model!="7") {
+	if(model!="2" && model!="3a" && model!="3b" && model!="4" && model!="5" && model!="6a" && model!="6b" && model!="7") {
 		stop(paste("Unrecognized model ",model,"; 'model' should be '2', '3a', '3b', '4', '5', '6a','6b' or '7'.", sep=""), call.=FALSE)
 	}
 	
@@ -182,6 +212,15 @@
 			cat(" Number of response variables (p) =", p,'\n','\n')
 		}
 
+		# Generates space and time helmert contrasts
+		A <- as.factor(rep(1:s,tt))
+		B <- rep(1,s)
+		for(i in 2:tt) B <- c(B,rep(i,s))
+		B <- as.factor(B)
+		HM <- model.matrix(~ A + B, contrasts = list(A="contr.helmert", B="contr.helmert"))
+		HM.S <- as.matrix(HM[,2:s])            # Helmert contrasts for Space, no intercept
+		HM.T <- as.matrix(HM[,(s+1):(s+tt-1)]) # Helmert contrasts for Time, no intercept
+		
 		# Generates space dbMEM variables (if necessary)
 		if(model=="3a"|| model=="6a" || model=="7"|| model=="4"|| model=="5") {
 			if(is.null(COD.S)) {	# Generate spatial dbMEMs if not given by user
@@ -224,40 +263,33 @@
 			        cat("\n There are only two time points. In this case, conputation of dbMEMs")
 			        cat("\n is useless. They are replaced by a vector of Helmert contrasts\n\n")
 			    } else {
-				if(print.res) cat(" Computing dbMEMs to code for time\n")
-				dbMEM.T.tmp <- dbmem(timesX, MEM.autocor="positive")
-				TT <- as.matrix(dbMEM.T.tmp)
-				dbMEM.T.thresh <- give.thresh(dist(timesX))
-				if(print.res) cat(" Truncation level for time dbMEMs =", dbMEM.T.thresh, "\n\n")
-				T.temp <- TT[1,]
-				for(i in 2:s) T.temp <- rbind(T.temp,TT[1,])
-				dbMEM.T <- as.matrix(T.temp)
-				for(j in 2:tt) {
-					T.temp <- TT[j,]
-					for(i in 2:s) T.temp <- rbind(T.temp,TT[j,])
-					dbMEM.T <- as.matrix(rbind(dbMEM.T,T.temp))
-				}
-				if(nT==-1)  nT <- ncol(TT)
-				else {
-				   if(nT > ncol(TT)) {
-				      cat("\n Number of requested temporal variables nT =", nT, "larger than available\n")
-				      cat(" The", ncol(TT), "available temporal dbMEM will be used\n\n")
-				      nT <- ncol(TT)
-				      }
-				    else dbMEM.T <- dbMEM.T[, 1:nT, drop = FALSE]
-				      }
-				if(nT) {
-				   if(nT > ncol(TT)) {
-				      cat("Number of requested temporal variables nT=", nT, "larger than available\n")
-				      cat("The", ncol(TT), "available temporal dbMEM will be used\n\n")
-				      nT <- ncol(TT)
-				      }
-				    else dbMEM.T <- dbMEM.T[, 1:nT, drop = FALSE]
-				      }
-				else  nT <- ncol(TT)
-    }
-
-
+			      if(print.res) cat(" Computing dbMEMs to code for time\n")
+			      dbMEM.T.tmp <- dbmem(timesX, MEM.autocor="positive")
+			      TT <- as.matrix(dbMEM.T.tmp)
+			      dbMEM.T.thresh <- give.thresh(dist(timesX))
+			      if(print.res) cat(" Truncation level for time dbMEMs =", dbMEM.T.thresh, "\n\n")
+			      
+			      dbMEM.T <- TT                                 # Replacement line, Added 04feb2022, 
+			      for(j in 2:s) dbMEM.T <- rbind(dbMEM.T, TT)   # Replacement line, Added 04feb2022,
+			      # T.temp <- TT[1,]
+				    # for(i in 2:s) T.temp <- rbind(T.temp,TT[1,])
+			      # dbMEM.T <- as.matrix(T.temp)
+			      # for(j in 2:tt) {
+			      # 	T.temp <- TT[j,]
+			      # 	for(i in 2:s) T.temp <- rbind(T.temp,TT[j,])
+			      # 	dbMEM.T <- as.matrix(rbind(dbMEM.T,T.temp))
+			      # }
+			      if(nT==-1)  nT <- ncol(TT)
+			      else {
+			        if(nT > ncol(TT)) {
+			          cat("\n Number of requested temporal variables nT =", nT, "larger than available\n")
+			          cat(" The", ncol(TT), "available temporal dbMEM will be used\n\n")
+			          nT <- ncol(TT)
+			        } else {
+			          dbMEM.T <- dbMEM.T[, 1:nT, drop = FALSE]
+			        }
+			      }
+			    }
 			} else {
 				dbMEM.T=apply(as.matrix(COD.T),2,scale,center=TRUE,scale=TRUE)
 				nT <- dim(dbMEM.T)[2]
@@ -281,15 +313,6 @@
 		}
 				
 
-		# Generates space and time helmert contrasts
-		A <- as.factor(rep(1:s,tt))
-		B <- rep(1,s)
-		for(i in 2:tt) B <- c(B,rep(i,s))
-		B <- as.factor(B)
-		HM <- model.matrix(~ A + B, contrasts = list(A="contr.helmert", B="contr.helmert"))
-		HM.S <- as.matrix(HM[,2:s])
-		HM.T <- as.matrix(HM[,(s+1):(s+tt-1)])
-		
 		test.STI = TRUE
 		test.S = TRUE
 		test.T = TRUE
@@ -338,8 +361,15 @@
 				cat(" MODEL VII: dbMEMs FOR BOTH SPACE AND TIME BUT HELMERT CONTRAST FOR INTERACTION.",'\n')
 			}		
 		} else if(model=="6a") {
-			XS <- dbMEM.S
-			for(j in 1:(tt-1)) XS <- cbind(XS,dbMEM.S*HM.T[,j])
+			# XS <- dbMEM.S
+			# for(j in 1:(tt-1)) XS <- cbind(XS,dbMEM.S*HM.T[,j])
+			# BEGIN: New code by Pierre to have a block diagonal matrix for XS
+		  # Miquel: This code is not using dbMEMs
+			XS <- matrix(0,n,tt*nS)       # Empty matrix
+			beg.x <- seq(1,n,by=s)        # vertical   # 1 13 25 37 49
+			beg.y <- seq(1,tt*nS,by=nS)   # horizontal   # 1 3 5 7 9
+			for(j in 1:tt) XS[(beg.x[j]):(beg.x[j]+s-1),(beg.y[j]):(beg.y[j]+nS-1)] <- SS
+			## END: New code by Pierre
 			XT <- HM.T
 			XSTI = NULL
 			if(print.res) {
@@ -347,9 +377,21 @@
 				cat("            TESTING FOR THE EXISTENCE OF SPATIAL STRUCTURE (COMMON OR SEPARATE)",'\n')
 			}	
 			test.STI = FALSE
+			test.T = FALSE    # Added 18jan2022
 		} else if(model=="6b") {
-			XT <- dbMEM.T
-			for(j in 1:(s-1)) XT <- cbind(XT,dbMEM.T*HM.S[,j])
+			# XT <- dbMEM.T
+			# for(j in 1:(s-1)) XT <- cbind(XT,dbMEM.T*HM.S[,j])
+		  # BEGIN: New code by Pierre to have a block diagonal matrix for XT
+		  TT = as.matrix(dbmem(Ti))  # dbMEM pour les 5 Temps
+		  XT <- matrix(0,n,s*nT)      # Empty matrix to house the diagonal blocks
+		  beg.x <- seq(1,n,by=s)      # rows to fill at beginning: 1 6 11 16 21 26 31 36 41 46 51 56
+		  beg.y <- seq(1,s*nT,by=nT)  # columns to fill at the beginning: 1  4  7 10 13
+		  for(j in 1:s) {      # Groups of 3 columns in XT
+		    for(i in 1:tt) { # Fill tt rows with T1 to T12 in each group of 3 columns
+		      XT[(beg.x[i]+j-1), (beg.y[j]):(beg.y[j]+nT-1)] <- TT[i,]
+		    }
+		  }
+		  ## END: New code by Pierre
 			XS <- HM.S						
 			XSTI = NULL
 			if(print.res) {
@@ -357,6 +399,7 @@
 				cat("            TESTING FOR THE EXISTENCE OF TEMPORAL STRUCTURE (COMMON OR SEPARATE).",'\n')
 			}	
 			test.STI = FALSE
+			test.S = FALSE    # Added 18jan2022
 		} else if(model=="2") {
 			XS <- HM.S
 			XT <- HM.T

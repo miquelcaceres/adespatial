@@ -83,8 +83,10 @@ the mean squares for the F numerator (\code{MS.num}), the mean squares for
 the F denominator (\code{MS.den}), the proportion of explained variance
 (\code{R2}), the adjusted proportion of explained variance (\code{R2.adj}),
 the F statistics (\code{F}) and its p-value computed from a permutation test
-(\code{Prob}). } \item{testT}{ An object with the result of the time effect
-test, like \code{testS}.} \item{teststi}{ An object with the result of the
+(\code{Prob}). } 
+\item{testT}{ An object with the result of the time effect
+test, like \code{testS}.} 
+\item{teststi}{ An object with the result of the
 space-time interaction test, like \code{testS}.}
 }
 \description{
@@ -95,24 +97,52 @@ way. In many models, degrees of freedom are saved by coding space and/or
 time parsimoniously using distance-based Moran Eigenvector Maps (dbMEM).
 }
 \details{
-In \code{stimodels} tests for space-time interaction and space or time main
-effects are conducted using one of the different models. With Models 2, 6a
-and 6b the interaction test is not available.
+The 'stimodels' and 'quicksti' functions should only be used 
+(1) when each site has been sampled during each survey, with no missing data, 
+and (2) when there are no replicate observations of the space-time points. When 
+there is replication, use a regular permutational Manova function such as adonis2.
 
-Model 2 - Space and Time are coded using Helmert contrasts for the main
-effects. No interaction is tested. Model 3a - Space is coded using dbMEM
-variables whereas Time is coded using Helmert contrasts. Model 3b - Space is
-coded using Helmert contrasts whereas Time is coded using dbMEM variables.
-Model 4 - Both Space and Time are coded using dbMEM variables for all tests.
-Model 5 - Space and Time are coded using Helmert contrasts for the main
-factor effects, but they are coded using dbMEM variables for the interaction
-term. Model 6a - Nested model. Testing for the existence of spatial
-structure (common or separate) using dbMEM variables to code for Space.
-Model 6b - Nested model. Testing for the existence of temporal structure
-(common or separate) using dbMEM variables to code for Time. Model 7 -
-Space and Time are coded using dbMEM variables for the main factor effects,
-but they are coded using Helmert contrasts for the interaction term (not
-recommended).
+When the sites form a one-dimensional spatial transect, or a meandering line 
+such as the course of a river, with regular sampling intervals, and the time series 
+has fairly equal time intervals, one can use the S and Ti arguments to indicate 
+the number of sites in space and the number of surveys along time. The order of 
+the sites in each temporal block of the input data file will be taken to correspond 
+to the spatial positions of the sites along the transect (from 1 to S), and the 
+order of the time blocks in the data file will be taken to indicate the temporal 
+order of the surveys (from 1 to Ti). The function will then compute dbMEM 
+eigenfunctions corresponding to the spatial and temporal positions of the data 
+rows in the input data file as if they were on straight lines.
+
+When the sites do not form a regular, one-dimensional spatial transect, one must 
+provide a file of spatial coordinates of the sites to argument S. Similarly, when 
+the time series has unequal time intervals, one must provide a file of temporal 
+coordinates of the surveys to argument Ti.
+
+Alternatively, one can use arguments COD.S or COD.T to provide a matrix of Helmert 
+contrasts to be used in the analysis in place of dbMEM eigenfunctions. One can do 
+that, for example, when there are only a few surveys along time and it would not 
+be useful to represent these few surveys by dbMEM eigenfunctions. That matrix can 
+have the class "matrix" or "numeric"; they both work in functions stimodels and 
+quicksti. Arguments COD.S and COD.T can also be used to provide matrices 
+containing other types of eigenfunctions, for example AEM eigenfunctions, to be 
+used instead of dbMEM matrices computed by stimodels or quicksti. However, do not 
+code both the space and time factors as Helmert contrasts; that would not leave 
+residual degrees of freedom for the test of the interaction.
+
+In \code{stimodels} tests for space-time interaction and space or time main
+effects are conducted using one of the different models:
+\itemize{
+  \item{Model 2 - Space and Time are coded using Helmert contrasts for the main effects. No interaction is tested. }
+  \item{Model 3a - Space is coded using dbMEM variables whereas Time is coded using Helmert contrasts. }
+  \item{Model 3b - Space is coded using Helmert contrasts whereas Time is coded using dbMEM variables. }
+  \item{Model 4 - Both Space and Time are coded using dbMEM variables for all tests. }
+  \item{Model 5 - Space and Time are coded using Helmert contrasts for the main factor effects, but they are coded using dbMEM variables for the interaction term.}
+  \item{Model 6a - Nested model. Testing for the existence of spatial structure (common or separate) using dbMEM variables to code for Space. }
+  \item{Model 6b - Nested model. Testing for the existence of temporal structure (common or separate) using dbMEM variables to code for Time. }
+  \item{Model 7 - Space and Time are coded using dbMEM variables for the main factor effects, but they are coded using Helmert contrasts for the interaction term (not recommended).}
+}
+
+With Models 2, 6a and 6b the interaction test is not available. 
 
 When using \code{quicksti}, space-time interaction is first tested using
 Model 5. Depending on the outcome of this test, the main factors are tested
